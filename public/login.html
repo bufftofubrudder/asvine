@@ -4,34 +4,64 @@
   <script src="https://www.googletagmanager.com/gtag/js?id=UA-149290199-1"
           defer></script>
 
-  <title>Aspine | Login</title>
+  <title>Asvine | Login</title>
 
-  <meta name="Description" content="The Aspine CRLS Student Dashboard is perfect for keeping up with your Aspen grades, predicting how future assignments and test corrections will affect your overall grade and GPA, and viewing your schedule, report cards, and the CRLS clock.">
+  <meta name="Description" content="The Asvine CRLS Student Dashboard is perfect for keeping up with your Aspen grades, predicting how future assignments and test corrections will affect your overall grade and GPA, and viewing your schedule, report cards, and the CRLS clock.">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#00551C"/>
-  <meta name="apple-itunes-app" content="app-id=1498713667, affiliate-data=myAffiliateData, app-argument=https://apps.apple.com/us/app/aspine/id1498713667?mt=8">
+  <meta name="apple-itunes-app" content="app-id=1498713667, affiliate-data=myAffiliateData, app-argument=https://apps.apple.com/us/app/Asvine/id1498713667?mt=8">
   <link rel="icon" type="image/x-icon" href="favicon.ico"/>
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" type="text/css" href="css/login.css">
   <!-- https://www.filamentgroup.com/lab/load-css-simpler/ -->
-  <link rel="stylesheet" type="text/css"
-        href="fonts/fontawesome/css/all.min.css"
-        media="print" onload="this.media='all'">
+  <link rel="stylesheet" type="text/css" href="fonts/fontawesome/css/all.min.css" media="print" onload="this.media='all'">
   <script src="vendor/jquery/jquery.min.js" defer></script>
   <script src="vendor/tilt/tilt.jquery.min.js" defer></script>
   <script type="text/javascript" src="js/login.js" defer></script>
+  <style>
+    /* Additional CSS for independent image rotation */
+    .login100-pic img {
+      width: 350px;
+      height: 350px;
+      object-fit: cover;
+      transition: transform 0.3s ease-in-out;
+    }
+
+    .login100-pic img:hover {
+      transform: rotate(360deg);
+    }
+
+    /* Grid layout */
+    .login100-pic .row {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .login100-pic .column {
+      padding: 10px;
+    }
+
+    /* Centering the login form */
+    .login-form-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+  </style>
 </head>
 <body>
   <noscript>
     <p><strong>
-      Aspine is designed to work mainly as a client-side web application
+      Asvine is designed to work mainly as a client-side web application
       to maintain security and privacy, which means that most of the code is
       JavaScript code run in your Web browser.
-      Aspine is free/libre and open source software with source code available
+      Asvine is free/libre and open source software with source code available
       at
       <a href="https://github.com/Aspine/aspine/">https://github.com/Aspine/aspine/</a>.
-      Please enable JavaScript in your Web browser in order to use Aspine.
+      Please enable JavaScript in your Web browser in order to use Asvine.
     </strong></p>
   </noscript>
 
@@ -42,16 +72,37 @@
       <div class="container-login100">
         <div class="wrap-login100">
           <div class="login-form-container">
-            <div class="login100-pic js-tilt" data-tilt style="display: flex; justify-content: center; align-items: center;">
-              <picture>
-                <source srcset="images/blank.png" media="(max-width: 768px)">
-                <img src="images/logo-circle350x350.png" alt="Aspine logo">
-              </picture>
-            </div>
+            <div class="login100-pic js-tilt" data-tilt>
+              <div class="row">
+                <div class="column">
+                  <img src="images/logo-circle350x350.png" alt="Stephan logo">
+                </div>
+                <div class="column">
+                  <img src="images/danylo.png" alt="Danylo logo">
+                </div>
+              </div>
+              <div class="row">
+                <div class="column">
+                  <img src="images/jay.jpg" alt="Jay logo">
+                </div>
+                <div class="column">
+                  <img src="images/elias.jpg" alt="Elias logo">
+                </div>
+	 	<div>
+		     <img src="images/eyal.jpg" alt="Eyal logo">
+		</div>
+              </div>
+              <div class="row">
+                <div class="column">
+                  <img src="images/subahan.jpeg" alt="Subahan logo">
+                </div>
+		  <img src="images/ari.jpg" alt="Ari logo">
+              </div>
 
+            </div>
             <form id="login100-form" action="/login" method="POST">
               <span id="login100-form-title">
-                Aspine Login
+                Asvine Login
               </span>
               <div class="text-center p-t-12">
                 <span class="txt1" style="color:#595959">
@@ -70,7 +121,7 @@
               </div>
               <!-- Password Input -->
               <div class="wrap-input100">
-                <input class="input100" id="input-password" type="password" name="password" placeholder="Password" aria-label="Aspen Password">
+                <input class="input100" id="input-password" type="password" name="password" placeholder="Enter your password" aria-label="Aspen Password">
                 <span class="focus-input100"></span>
                 <span class="symbol-input100">
                   <i class="fa fa-lock" aria-hidden="true"></i>
@@ -99,16 +150,10 @@
                 <a href="https://github.com/Aspine/aspine/issues" target="none">Issue/Feature Requests</a>
               </li>
               <li>
-                <a href="https://github.com/Aspine/aspine" target="none">Our GitHub Repository</a>
+                <a href="https://github.com/Aspine/aspine" target="none">The Aspine GitHub Repository</a>
               </li>
               <li>
                 <a href="https://www.cpsd.us/privacy" target="none">Privacy Policy</a>
-              </li>
-              <li>
-                <a href="https://classroom.google.com/c/NTM1MjUyODk2MTE1?cjc=k6pbfx5" target="none">Join Our Club</a>
-              </li>
-              <li>
-                <a href="https://instagram.com/crls.aspine/" target="none">Follow Our Instagram</a>
               </li>
             </ul>
           </span>

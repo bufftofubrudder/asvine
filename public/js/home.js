@@ -1391,7 +1391,7 @@ function updatesCallback(updates, current_version) {
 
     // Remove first two paragraphs with information about semver
     document.querySelectorAll("#updates p:nth-of-type(n-2)").forEach(x => {
-        x.style.setProperty("display", "none");
+    	x.style.setProperty("display", "none");
     });
 }
 

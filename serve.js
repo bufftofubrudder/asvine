@@ -13,10 +13,6 @@ const TOML = require('@iarna/toml');
 
 const scraper = require('./js/scrape');
 const dep_mappings = require('./frontend-dependencies');
-
-// -------------------------------------------
-
-// Get Aspine version number without leading 'v'
 const version = child_process.execSync('git describe')
     .toString().trim().match(/^v?(.*)/)[1];
 const changelog = marked(
@@ -234,68 +230,67 @@ app.use((req, res) => {
 });
 
 
-// app.post('/set-settings', async (req, res) => {
-//     // TODO: Sanitization
-//     let key = crypto.createHash('md5').update(req.session.username).digest('hex');
-//     client.set(`settings:${key}`, JSON.stringify(req.body));
-//     res.status(200).send("set settings");
-// });
-//
-// app.get('/get-settings', async (req, res) => {
-//     if(typeof(req.session.username) == "undefined") {
-//         res.status(400).send("User not logged in");
-//         return;
-//     }
-//     let key = crypto.createHash('md5').update(req.session.username).digest('hex');
-//     client.get(`settings:${key}`, function (err, reply) {
-//         if(!reply) {
-//             //res.send(JSON.stringify({calendars:[]}));
-//             res.send({calendars:["CRLS", "holidays"]});
-//         } else {
-//             res.send(JSON.parse(reply));
-//         }
-//     });
-// });
-//
-// app.post('/add-calendar', async (req, res) => {
-//     console.log(req.body.color);
-//     // Security: MUST SANITIZE URLS
-//     if(req.body.id == undefined || !validator.isEmail(req.body.id) ||
-//         req.body.name == undefined || !req.body.name.match(/^[\-0-9a-zA-Z.'' ]+$/g) ||
-//         req.body.color == undefined || !req.body.color.match(/^([\-0-9a-fA-F]){6}$/g)) {
-//         res.status(400).send("Malformed ID, Name, or Color");
-//         return;
-//     }
-//
-//     // Check to see if it is public and working
-//     const calendar = await fetch(`https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(req.body.id)}/events?key=AIzaSyDtbQCoHa4lC4kW4g4YXTyb8f5ayJct2Ao&timeMin=2019-02-23T00%3A00%3A00Z&timeMax=2019-04-08T00%3A00%3A00Z&singleEvents=true&maxResults=9999&_=1552838482460`);
-//     if(!calendar.ok) {
-//         res.status(400).send("Bad Calendar ID");
-//         return;
-//     }
-//
-//     let cal = JSON.stringify({
-//         name: req.body.name,
-//         id: req.body.id,
-//         color: req.body.color
-//     });
-//     client.lrem('calendars', 0, cal);
-//
-//     client.rpush('calendars',
-//     JSON.stringify({
-//         name: req.body.name,
-//         id: req.body.id,
-//         color: req.body.color
-//     }));
-//
-//     res.status(200).send("added calendar");
-// });
-//
-// app.get('/get-calendars', async (req, res) => {
-//     client.lrange(`calendars`, 0, -1, function (err, reply) {
-//         for(i in reply) {
-//             reply[i] = JSON.parse(reply[i]);
-//         }
-//         res.send(reply);
-//     });
-// });
+app.post('/set-settings', async (req, res) => {
+    // TODO: Sanitization
+    let key = crypto.createHash('md5').update(req.session.username).digest('hex');
+    client.set(`settings:${key}`, JSON.stringify(req.body));
+    res.status(200).send("set settings");
+});
+
+app.get('/get-settings', async (req, res) => {
+    if(typeof(req.session.username) == "undefined") {
+        res.status(400).send("User not logged in");
+        return;
+    }
+    let key = crypto.createHash('md5').update(req.session.username).digest('hex');
+    client.get(`settings:${key}`, function (err, reply) {
+        if(!reply) {
+            //res.send(JSON.stringify({calendars:[]}));
+            res.send({calendars:["CRLS", "holidays"]});
+        } else {
+            res.send(JSON.parse(reply));
+        }
+    });
+});
+
+app.post('/add-calendar', async (req, res) => {
+    console.log(req.body.color);
+    // Security: MUST SANITIZE URLS
+    if(req.body.id == undefined || !validator.isEmail(req.body.id) ||
+        req.body.name == undefined || !req.body.name.match(/^[\-0-9a-zA-Z.'' ]+$/g) ||
+        req.body.color == undefined || !req.body.color.match(/^([\-0-9a-fA-F]){6}$/g)) {
+        res.status(400).send("Malformed ID, Name, or Color");
+        return;
+    }
+
+    // Check to see if it is public and working
+    const calendar = await fetch(`https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(req.body.id)}/events?key=AIzaSyDtbQCoHa4lC4kW4g4YXTyb8f5ayJct2Ao&timeMin=2019-02-23T00%3A00%3A00Z&timeMax=2019-04-08T00%3A00%3A00Z&singleEvents=true&maxResults=9999&_=1552838482460`);
+    if(!calendar.ok) {
+        res.status(400).send("Bad Calendar ID");
+        return;
+    }
+
+    let cal = JSON.stringify({
+        name: req.body.name,
+        id: req.body.id,
+        color: req.body.color
+    });
+    client.lrem('calendars', 0, cal);
+
+    client.rpush('calendars',
+    JSON.stringify({
+        name: req.body.name,
+        id: req.body.id,
+        color: req.body.color
+    }));
+
+    res.status(200).send("added calendar");
+});
+app.get('/get-calendars', async (req, res) => {
+    client.lrange(`calendars`, 0, -1, function (err, reply) {
+        for(i in reply) {
+            reply[i] = JSON.parse(reply[i]);
+        }
+        res.send(reply);
+    });
+});

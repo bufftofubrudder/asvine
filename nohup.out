@@ -1,0 +1,36 @@
+
+> aspine@2.9.0 start
+> tsc && node serve.js
+
+Aspine listening on port 8080!
+we are here
+{
+  code: '-1',
+  message: 'You are not logged on or your session has expired.'
+}
+TypeError: terms is not iterable
+    at get_quarter_oids (/home/aspen/aspine/js/scrape.js:356:40)
+    at processTicksAndRejections (internal/process/task_queues.js:97:5)
+    at async /home/aspen/aspine/js/scrape.js:13:30
+    at async get_session (/home/aspen/aspine/js/scrape.js:623:20)
+    at async Object.get_student (/home/aspen/aspine/js/scrape.js:11:12)
+    at async /home/aspen/aspine/serve.js:159:22
+npm ERR! Missing script: "stop"
+npm ERR! 
+npm ERR! To see a list of scripts, run:
+npm ERR!   npm run
+
+npm ERR! A complete log of this run can be found in:
+npm ERR!     /home/aspen/.npm/_logs/2024-03-19T14_24_50_121Z-debug-0.log
+we are here
+{
+  code: '-1',
+  message: 'You are not logged on or your session has expired.'
+}
+TypeError: terms is not iterable
+    at get_quarter_oids (/home/aspen/aspine/js/scrape.js:356:40)
+    at processTicksAndRejections (internal/process/task_queues.js:97:5)
+    at async /home/aspen/aspine/js/scrape.js:13:30
+    at async get_session (/home/aspen/aspine/js/scrape.js:623:20)
+    at async Object.get_student (/home/aspen/aspine/js/scrape.js:11:12)
+    at async /home/aspen/aspine/serve.js:159:22

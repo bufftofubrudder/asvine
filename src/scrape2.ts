@@ -34,22 +34,18 @@ export async function get_student(
   year: Year = Year.Current
 ): Promise<StudentData> {
   return await get_session(username, password, async session => {
-    console.log(session)
     const { student_name, student_oid } = await get_student_info(session);
     const quarter_oids = await get_quarter_oids(session, year);
 
     const academics = await get_academics(
       session, student_oid, quarter_oids, year
     );
-    console.log(academics);
     const class_details = await Promise.all(academics.map(async class_info =>
       get_class_details(session, class_info)));
     const overview = assemble_overview(class_details);
     const assignments = await Promise.all(class_details.map(async details =>
       get_assignments(session, quarter, quarter_oids, details)));
-    console.log(assignments);
     const recent = await get_recent(session);
-    console.log(recent)
 
     const isClass = function(x: Class | undefined): x is Class {
       return x !== undefined;
@@ -128,7 +124,7 @@ export async function get_schedule(
     const initial_page = await (await fetch(
       "https://aspen.cpsd.us/aspen/studentScheduleContextList.do?navkey=myInfo.sch.list", {
         headers: {
-          "Cookie": `JSESSIONID=${session.session_id};`,
+          "Cookie": `JSESSIONID=${session.session_id}`,
         },
       }
     )).text();
@@ -146,7 +142,7 @@ export async function get_schedule(
         "termOid": term_oid,
       }), {
         headers: {
-          "Cookie": `JSESSIONID=${session.session_id}; deploymentId=ma-cambridge; showNavbar=true`,
+          "Cookie": "JSESSIONID=xU9UGSw0ExQ3ryEcZqcbrXFV0pM0sFYCzw8CEM24.puse2aspenapp39_0; showNavbar=true",
         },
       }
     )).text();
@@ -220,7 +216,7 @@ export async function get_schedule(
 
 export async function get_stats(
   username: string, password: string, assignment_id: string, class_id: string,
-  quarter_id: string, year: Year, student_oid:String
+  quarter_id: string, year: Year
 ): Promise<Stats | {}> {
   return await get_session(username, password, async ({ session_id }) => {
     // The REST API does not expose assignment statistics (as far as we know),
@@ -229,11 +225,11 @@ export async function get_stats(
     // preliminaries:
 
     // Get list of classes
-    const class_list_page = await (await fetch( // BROKEN
-      `https://aspen.cpsd.us/aspen/rest/lists/academics.classes.list?count=25&customParams=selectedYear%7Ccurrent;selectedTerm%7Ccurrent&fieldSetOid=fsnX2ClsMbl+++&filter=%23%23%23all&offset=1&selectedStudent=${student_oid}&sort=default&unique=true`,
+    const class_list_page = await (await fetch(
+      "https://aspen.cpsd.us/aspen/rest/lists/academics.classes.list?count=25&customParams=selectedYear%7Ccurrent;selectedTerm%7Ccurrent&fieldSetOid=fsnX2ClsMbl+++&filter=%23%23%23all&offset=1&selectedStudent=stdX2002102880&sort=default&unique=true",
       {
         "headers": {
-          "Cookie": `JSESSIONID=${session_id};`,
+          "Cookie": `JSESSIONID=${session_id}`,
         },
       })).text();
 
@@ -260,7 +256,7 @@ export async function get_stats(
     // Get class details
     await fetch("https://aspen.cpsd.us/aspen/portalClassList.do", {
       headers: {
-        "Cookie": `JSESSIONID=${session_id};`,
+        "Cookie": `JSESSIONID=${session_id}`,
       },
       method: "POST",
       body: new URLSearchParams({
@@ -274,7 +270,7 @@ export async function get_stats(
     await fetch(
       "https://aspen.cpsd.us/aspen/portalAssignmentList.do?navkey=academics.classes.list.gcd", {
         headers: {
-          "Cookie": `deploymentId=x2sis; JSESSIONID=${session_id};`,
+          "Cookie": `deploymentId=x2sis; JSESSIONID=${session_id}`,
         },
       }
     );
@@ -282,7 +278,7 @@ export async function get_stats(
     // Change term in assignments list
     await fetch("https://aspen.cpsd.us/aspen/portalAssignmentList.do", {
       headers: {
-        "Cookie": `JSESSIONID=${session_id};`
+        "Cookie": `JSESSIONID=${session_id}`
       },
       method: "POST",
       body: new URLSearchParams({
@@ -295,7 +291,7 @@ export async function get_stats(
     // Get assignment statistics
     const stats_page = await (await fetch("https://aspen.cpsd.us/aspen/portalAssignmentList.do", {
       headers: {
-        "Cookie": `JSESSIONID=${session_id};`,
+        "Cookie": `JSESSIONID=${session_id}`,
       },
       method: "POST",
       body: new URLSearchParams({
@@ -356,7 +352,7 @@ async function get_recent(session: Session): Promise<Recent> {
     }),
     {
       headers: {
-        "Cookie": `JSESSIONID=${session.session_id}; deploymentId=ma-cambridge; showNavbar=true`,
+        "Cookie": "JSESSIONID=xU9UGSw0ExQ3ryEcZqcbrXFV0pM0sFYCzw8CEM24.puse2aspenapp39_0; showNavbar=true",
       },
     }
   )).text();
@@ -392,48 +388,46 @@ async function get_recent(session: Session): Promise<Recent> {
 async function get_current_quarter(
   session: Session, year: Year, class_info?: ClassInfo
 ): Promise<Quarter> {
-  //TODO: this
   // If not current year, the "current" quarter is undefined and we can just
   // let it be Q1
-//   if (year != Year.Current) {
-//     return Quarter.Q1;
-//   }
+  if (year != Year.Current) {
+    return Quarter.Q1;
+  }
 
-//   let oid: string;
-//   if (class_info) {
-//     console.log("class ifno");
-//     ({ oid } = class_info);
-//   } else {
-//     const { student_oid } = await get_student_info(session);
-//     var param = new URLSearchParams({
-// //        "selectedStudent": student_oid,
-//         "customParams": `selectedYear|${year};selectedTerm|all`,
-//       });
-// console.log(param);
-//     var url = "https://aspen.cpsd.us/aspen/rest/lists/academics.classes.list?count=25" + param + "&fieldSetOid=fsnX2Cls++++++&";
-// console.log(url);
-//     [{ oid }] = await (await fetch(
-//       url, {
-//         headers: {
-//           "Cookie": `JSESSIONID=${session.session_id}; deploymentId=ma-cambridge; showNavbar=true`,
-//         },
-//       }
-//     )).json();
-//   }
+  let oid: string;
+  if (class_info) {
+    ({ oid } = class_info);
+  } else {
+    const { student_oid } = await get_student_info(session);
+    var param = new URLSearchParams({
+//        "selectedStudent": student_oid,
+        "customParams": `selectedYear|${year};selectedTerm|all`,
+      });
+console.log(param);
+    var url = "https://aspen.cpsd.us/aspen/rest/lists/academics.classes.list?count=25" + param + "&fieldSetOid=fsnX2Cls++++++&";
+console.log(url);
+    [{ oid }] = await (await fetch(
+      url, {
+        headers: {
+          "Cookie": "JSESSIONID=xU9UGSw0ExQ3ryEcZqcbrXFV0pM0sFYCzw8CEM24.puse2aspenapp39_0; showNavbar=true",
+        },
+      }
+    )).json();
+  }
 
-//   const { currentTermIndex } = await (await fetch(
-//     `https://aspen.cpsd.us/aspen/rest/studentSchedule/${oid}/gradeTerms`, {
-//       headers: {
-//         "Cookie": `JSESSIONID=${session.session_id}; deploymentId=ma-cambridge; showNavbar=true`,
-//       },
-//     }
-//   )).json();
+  const { currentTermIndex } = await (await fetch(
+    `https://aspen.cpsd.us/aspen/rest/studentSchedule/${oid}/gradeTerms`, {
+      headers: {
+        "Cookie": "JSESSIONID=xU9UGSw0ExQ3ryEcZqcbrXFV0pM0sFYCzw8CEM24.puse2aspenapp39_0; showNavbar=true",
+      },
+    }
+  )).json();
 
-  // if (currentTermIndex + 1 in Quarter) {
-  //   return currentTermIndex + 1;
-  // } else {
-    return Quarter.Q3;
-  // }
+  if (currentTermIndex + 1 in Quarter) {
+    return currentTermIndex + 1;
+  } else {
+    return 1;
+  }
 }
 
 /**
@@ -443,7 +437,7 @@ async function list_pdf_files({ session_id }: Session): Promise<PDFFileInfo[]> {
   const pdf_files: any[] = await (await fetch(
     "https://aspen.cpsd.us/aspen/rest/reports", {
       headers: {
-        "Cookie": `JSESSIONID=${session_id};`,
+        "Cookie": `JSESSIONID=${session_id}`,
       },
     }
   )).json();
@@ -456,14 +450,18 @@ async function list_pdf_files({ session_id }: Session): Promise<PDFFileInfo[]> {
 async function get_student_info({ session_id }: Session): Promise<{
   student_name: string, student_oid: string
 }> {
-  const [{ name: student_name, studentOid: student_oid }] = await (await fetch(
-    "https://aspen.cpsd.us/aspen/rest/users/students", {
+  //const [{ name: student_name, studentOid: student_oid }] = await (await fetch(
+  console.log('we are here');
+console.log(session_id);
+    console.log(await (await fetch(
+    "https://aspen.cpsd.us/aspen/rest/users/students?count=25&customParams=selectedYear%7Ccurrent;selectedTerm%7Ccurrent&fieldSetOid=fsnX2ClsMbl+++&filter=%23%23%23all&offset=1&selectedStudent=stdX2002102880&sort=default&unique=true", {
       headers: {
-        "Cookie": `JSESSIONID=${session_id}`,
+        "Cookie": "JSESSIONID=xU9UGSw0ExQ3ryEcZqcbrXFV0pM0sFYCzw8CEM24.puse2aspenapp39_0; showNavbar=true",
       },
     }
-  )).json();
-  console.log(student_oid)
+  )).json());
+  const student_name = '';
+  const student_oid = '';
   return { student_name, student_oid };
 }
 
@@ -472,13 +470,12 @@ async function get_quarter_oids(
 ): Promise<Map<Quarter, string>> {
   const mapping = new Map<Quarter, string>();
   const terms: { gradeTermId: string, oid: string }[] = await (await fetch(
-    "https://aspen.cpsd.us/aspen/rest/lists/academics.classes.list/studentGradeTerms?count=25&customParams=selectedYear%7Ccurrent;selectedTerm%7Ccurrent&fieldSetOid=fsnX2ClsMbl+++&filter=%23%23%23all&offset=1&selectedStudent=stdX2002104931&sort=default&unique=true", {
+    "https://aspen.cpsd.us/aspen/rest/lists/academics.classes.list/studentGradeTerms?count=25&customParams=selectedYear%7Ccurrent;selectedTerm%7Ccurrent&fieldSetOid=fsnX2ClsMbl+++&filter=%23%23%23all&offset=1&selectedStudent=stdX2002102880&sort=default&unique=true", {
       headers: {
-        "Cookie": `JSESSIONID=${session.session_id}; deploymentId=ma-cambridge; showNavbar=true`,
+        "Cookie": "JSESSIONID=xU9UGSw0ExQ3ryEcZqcbrXFV0pM0sFYCzw8CEM24.puse2aspenapp39_0; showNavbar=true",
       },
     }
   )).json();
-  console.log("Got terms")
   for (const { gradeTermId, oid } of terms) {
     const [, quarter] = /^Q(\d)$/.exec(gradeTermId) as RegExpExecArray;
     const quarter_num = parseInt(quarter) ?? -1;
@@ -498,26 +495,20 @@ async function get_academics(
   { session_id }: Session, student_oid: string,
   quarter_oids: Map<Quarter, string>, year: Year
 ): Promise<ClassInfo[]> {
-  // ISSUE IS THAT STUDENT_OID = NULL https://aspen.cpsd.us/aspen/rest/users/students?count=25&customParams=selectedYear%7Ccurrent;selectedTerm%7Ccurrent&fieldSetOid=fsnX2ClsMbl+++&filter=%23%23%23all&offset=1&selectedStudent=stdX2002104931&sort=default&unique=true
-  console.log("Student id:" + student_oid)
-  //    "https://aspen.cpsd.us/aspen/rest/lists/academics.classes.list/studentGradeTerms?count=25&customParams=selectedYear%7Ccurrent;selectedTerm%7Ccurrent&fieldSetOid=fsnX2ClsMbl+++&filter=%23%23%23all&offset=1&selectedStudent=stdX2002104931&sort=default&unique=true", {
-
   const get_classes = async (quarter_oid: string) => await (await fetch(
-    "https://aspen.cpsd.us/aspen/rest/lists/academics.classes.list?" +
+    "https://aspen.cpsd.us/aspen/rest/lists/academics.classes.list?fieldSetOid=fsnX2Cls++++++&" +
     new URLSearchParams({
-      "count":"25",
-      "customParams": `selectedYear|${year};selectedTerm|${quarter_oid}`,
       "selectedStudent": student_oid,
-    }) + "&fieldSetOid=fsnX2ClsMbl++++++&filter=%23%23%23all&offset=1&sort=default&unique=true", {
+      "customParams": `selectedYear|${year};selectedTerm|${quarter_oid}`,
+    }), {
       headers: {
-        "Cookie": `JSESSIONID=${session_id}; deploymentId=ma-cambridge; showNavbar=true`,
+        "Cookie": "JSESSIONID=xU9UGSw0ExQ3ryEcZqcbrXFV0pM0sFYCzw8CEM24.puse2aspenapp39_0; showNavbar=true",
       },
     }
   )).json() as any[];
 
   // Get classes from all terms in an array
   const all_classes = await get_classes("all");
-  console.log(all_classes)
   // Set up a mapping from quarters to mappings from OIDs to class info
   const term_classes_mapping = new Map<Quarter, Map<string, any>>();
 
@@ -534,6 +525,7 @@ async function get_academics(
       ))
     )
   ));
+
   // For each class, assemble a ClassInfo object
   return all_classes.map(({
     oid,
@@ -583,7 +575,7 @@ async function get_class_details(
   const { averageSummary, attendanceSummary } = await (await fetch(
     `https://aspen.cpsd.us/aspen/rest/studentSchedule/${class_info.oid}/academics`, {
       headers: {
-        "Cookie": `JSESSIONID=${session_id}; deploymentId=ma-cambridge; showNavbar=true`,
+        "Cookie": "JSESSIONID=xU9UGSw0ExQ3ryEcZqcbrXFV0pM0sFYCzw8CEM24.puse2aspenapp39_0; showNavbar=true",
       },
     }
   )).json();
@@ -628,7 +620,7 @@ async function get_assignments(
     async x => await (await fetch(
       `https://aspen.cpsd.us/aspen/rest/studentSchedule/${class_details.oid}/categoryDetails/${x}?gradeTermOid=${quarter_oid}`, {
         headers: {
-          "Cookie": `JSESSIONID=${session_id}; deploymentId=ma-cambridge; showNavbar=true`,
+          "Cookie": "JSESSIONID=xU9UGSw0ExQ3ryEcZqcbrXFV0pM0sFYCzw8CEM24.puse2aspenapp39_0; showNavbar=true",
         },
       }
     )).json()
@@ -724,7 +716,7 @@ async function download_pdf(
   return (await (await fetch(
     `https://aspen.cpsd.us/aspen/rest/reports/${id}/file`, {
       headers: {
-        "Cookie": `JSESSIONID=${session_id}; deploymentId=ma-cambridge; showNavbar=true`,
+        "Cookie": "JSESSIONID=xU9UGSw0ExQ3ryEcZqcbrXFV0pM0sFYCzw8CEM24.puse2aspenapp39_0; showNavbar=true",
       },
     }
   )).buffer()).toString("binary");
@@ -789,75 +781,52 @@ async function get_session<T>(
     }
     login_page = await resp.text();
   }
-  
-  const [, session_id] = /jsessionid=(.[^"]+)"/.exec(
+
+  const [, session_id] = /sessionId='(.+)';/.exec(
     login_page
   ) as RegExpExecArray;
   const [, apache_token] =
     /name="org.apache.struts.taglib.html.TOKEN" value="(.+)"/.exec(
       login_page
     ) as RegExpExecArray;
-  console.log(session_id)
+
   // Submit login username, password, and session information
   const login_response = await (await fetch(
     "https://aspen.cpsd.us/aspen/logon.do", {
-      headers:{
-        "Cookie": `JSESSIONID=${session_id}; deploymentId=ma-cambridge; showNavbar=true`
+      headers: {
+        "Cookie": "JSESSIONID=xU9UGSw0ExQ3ryEcZqcbrXFV0pM0sFYCzw8CEM24.puse2aspenapp39_0; showNavbar=true",
       },
       method: "POST",
       redirect: "manual",
       body: new URLSearchParams({
         "org.apache.struts.taglib.html.TOKEN": apache_token,
         "userEvent": "930",
-        "userParam":"",
-        "operationId":"",
-        "deploymentId":	"ma-cambridge",
-        "mobile":"true",
-        "SSOLoginDone":"",
+        "deploymentId": "x2sis",
         "username": username,
         "password": password,
       }),
     }
   )).text();
-  console.log(login_response.length)
-  // const [, s] = /sessionId='(.+)';/.exec(
-  //   login_response
-  // ) as RegExpExecArray;
-  const get_page = await(await fetch("https://aspen.cpsd.us/aspen/home.do", {
-    headers:{
-      "Cookie": `JSESSIONID=${session_id}; deploymentId=ma-cambridge; showNavbar=true`
-    },
-    method: "GET",
-    redirect: "manual"
-  }
-)).text();
-
-console.log(get_page)
-
-console.log(session_id)
-// console.log(s)
-  if (login_response.includes("Invalid login.") || login_response.includes("Not Logged In")) {
+  if (login_response.includes("Invalid login.")) {
     throw new Error(AspineErrorCode.LOGINFAIL);
   }
 
   const result = await callback({ session_id, apache_token });
 
-  // await (await fetch(
-  //   "https://aspen.cpsd.us/aspen/logout.do", {
-  //     headers: {
-  //       "Cookie": " JJSESSIONID=3ISC6085H8SWzS1_wNa8F7t91ciIFilsoB6A1kIE; deploymentId=ma-cambridge; showNavbar=true",
-  //     },
-  //     redirect: "manual",
-  //   }
-  // )).text();
+  await (await fetch(
+    "https://aspen.cpsd.us/aspen/logout.do", {
+      headers: {
+        "Cookie": "JSESSIONID=xU9UGSw0ExQ3ryEcZqcbrXFV0pM0sFYCzw8CEM24.puse2aspenapp39_0; showNavbar=true",
+      },
+      redirect: "manual",
+    }
+  )).text();
+
   return result;
 }
 
 // Code for testing purposes
 if (require.main === module) {
-  console.log(get_student(
-    process.env.USERNAME || "", process.env.PASSWORD || "", 1, Year.Previous
-  ))
   get_student(
     process.env.USERNAME || "", process.env.PASSWORD || "", 1, Year.Previous
   ).then(

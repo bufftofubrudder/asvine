@@ -446,8 +446,22 @@ iframe {
   }
 
   .login100-pic {
-    display: none;
-  }
+  width: 100%; /* Adjust the width as needed */
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+}
+
+.login100-pic .column {
+  flex: 1 1 300px; /* Adjust the width as needed */
+  padding: 10px;
+}
+
+.login100-pic img {
+  max-width: 100%; /* Ensure images don't exceed their container width */
+  height: auto; /* Ensure aspect ratio is maintained */
+}
 
   #login100-form {
     width: 100%;
