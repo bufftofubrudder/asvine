@@ -34,22 +34,18 @@ export async function get_student(
   year: Year = Year.Current
 ): Promise<StudentData> {
   return await get_session(username, password, async session => {
-    console.log(session)
     const { student_name, student_oid } = await get_student_info(session);
     const quarter_oids = await get_quarter_oids(session, year);
 
     const academics = await get_academics(
       session, student_oid, quarter_oids, year
     );
-    console.log(academics);
     const class_details = await Promise.all(academics.map(async class_info =>
       get_class_details(session, class_info)));
     const overview = assemble_overview(class_details);
     const assignments = await Promise.all(class_details.map(async details =>
       get_assignments(session, quarter, quarter_oids, details)));
-    console.log(assignments);
     const recent = await get_recent(session);
-    console.log(recent)
 
     const isClass = function(x: Class | undefined): x is Class {
       return x !== undefined;
@@ -463,7 +459,6 @@ async function get_student_info({ session_id }: Session): Promise<{
       },
     }
   )).json();
-  console.log(student_oid)
   return { student_name, student_oid };
 }
 
@@ -478,7 +473,6 @@ async function get_quarter_oids(
       },
     }
   )).json();
-  console.log("Got terms")
   for (const { gradeTermId, oid } of terms) {
     const [, quarter] = /^Q(\d)$/.exec(gradeTermId) as RegExpExecArray;
     const quarter_num = parseInt(quarter) ?? -1;
@@ -499,7 +493,6 @@ async function get_academics(
   quarter_oids: Map<Quarter, string>, year: Year
 ): Promise<ClassInfo[]> {
   // ISSUE IS THAT STUDENT_OID = NULL https://aspen.cpsd.us/aspen/rest/users/students?count=25&customParams=selectedYear%7Ccurrent;selectedTerm%7Ccurrent&fieldSetOid=fsnX2ClsMbl+++&filter=%23%23%23all&offset=1&selectedStudent=stdX2002104931&sort=default&unique=true
-  console.log("Student id:" + student_oid)
   //    "https://aspen.cpsd.us/aspen/rest/lists/academics.classes.list/studentGradeTerms?count=25&customParams=selectedYear%7Ccurrent;selectedTerm%7Ccurrent&fieldSetOid=fsnX2ClsMbl+++&filter=%23%23%23all&offset=1&selectedStudent=stdX2002104931&sort=default&unique=true", {
 
   const get_classes = async (quarter_oid: string) => await (await fetch(
@@ -517,7 +510,6 @@ async function get_academics(
 
   // Get classes from all terms in an array
   const all_classes = await get_classes("all");
-  console.log(all_classes)
   // Set up a mapping from quarters to mappings from OIDs to class info
   const term_classes_mapping = new Map<Quarter, Map<string, any>>();
 
@@ -797,7 +789,6 @@ async function get_session<T>(
     /name="org.apache.struts.taglib.html.TOKEN" value="(.+)"/.exec(
       login_page
     ) as RegExpExecArray;
-  console.log(session_id)
   // Submit login username, password, and session information
   const login_response = await (await fetch(
     "https://aspen.cpsd.us/aspen/logon.do", {
@@ -832,9 +823,6 @@ async function get_session<T>(
   }
 )).text();
 
-console.log(get_page)
-
-console.log(session_id)
 // console.log(s)
   if (login_response.includes("Invalid login.") || login_response.includes("Not Logged In")) {
     throw new Error(AspineErrorCode.LOGINFAIL);
@@ -855,9 +843,6 @@ console.log(session_id)
 
 // Code for testing purposes
 if (require.main === module) {
-  console.log(get_student(
-    process.env.USERNAME || "", process.env.PASSWORD || "", 1, Year.Previous
-  ))
   get_student(
     process.env.USERNAME || "", process.env.PASSWORD || "", 1, Year.Previous
   ).then(
